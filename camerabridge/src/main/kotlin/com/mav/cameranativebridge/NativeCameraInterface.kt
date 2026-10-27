@@ -104,7 +104,7 @@ class NativeCameraInterface(private val appContext: Context) : AutoCloseable {
             error("camera init failed — check logcat for gp_camera_init details")
         }
         opened = true
-        Log.i(TAG, "camera session opened: ${connection.deviceName}; ${nativeVersion()}")
+        Log.i(TAG, "camera session opened (fd=$fd); ${nativeVersion()}")
         return this
     }
 
@@ -118,7 +118,7 @@ class NativeCameraInterface(private val appContext: Context) : AutoCloseable {
     }
 
     @Synchronized
-    fun close() {
+    override fun close() {   /* AutoCloseable.use()-friendly */
         if (opened) {
             runCatching { nativeClose() }
             opened = false
@@ -195,12 +195,19 @@ class NativeCameraInterface(private val appContext: Context) : AutoCloseable {
     /* helpers                                                         */
     /* --------------------------------------------------------------- */
 
+    /**
+     * True for Canon PTP imaging devices (EOS M50 Mark II et al.).
+     * Note: bionic/UsbConstants spells the still-image class "CSCID" (class 0x06).
+     */
     fun isCanonM50(device: UsbDevice): Boolean {
-        val imageClass = device.deviceClass == UsbConstants.USB_CLASS_IMAGE ||
-            device.interfaceList.any {
-                it.interfaceClass == UsbConstants.USB_CLASS_IMAGE
+        if (device.vendorId != CANON_VENDOR_ID) return false
+        if (device.deviceClass == UsbConstants.USB_CLASS_CSCID) return true
+        for (i in 0 until device.interfaceCount) {
+            if (device.getInterface(i).interfaceClass == UsbConstants.USB_CLASS_CSCID) {
+                return true
             }
-        return device.vendorId == CANON_VENDOR_ID && imageClass
+        }
+        return false
     }
 
     @Deprecated("use close()")
