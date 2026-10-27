@@ -50,31 +50,16 @@ set(CONFIG_INC ${CMAKE_CURRENT_SOURCE_DIR}/config)
 set(LTDL_INC ${CMAKE_CURRENT_SOURCE_DIR}/ltdl)
 
 # -----------------------------------------------------------------------------
-# Global compile definitions for the Android, NDK, no-NLS, minimal deps build
+# Global compile definitions for the Android, NDK, no-NLS, minimal deps build.
+# NOTE: all HAVE_* feature knobs live exclusively in cpp/config/config.h —
+# defining them here as well triggers -Wmacro-redefined spam (different
+# "1" value forms) but is otherwise redundant.
 # -----------------------------------------------------------------------------
 add_library(gp_compile_defs INTERFACE)
 target_compile_definitions(gp_compile_defs INTERFACE
     HAVE_CONFIG_H
-    # ptp2 / libgphoto2 misc guards
-    HAVE_LSTAT
-    HAVE_CFMAKERAW
-    HAVE_SELECT
-    HAVE_SYS_TIME_H
-    HAVE_SYS_PARAM_H
-    HAVE_UNISTD_H
-    HAVE_STDLIB_H
-    HAVE_STRING_H
-    HAVE_STRINGS_H
-    HAVE_STDINT_H
-    HAVE_INTTYPES_H
-    HAVE_MEMMEM
-    HAVE_VA_COPY
     # internal-code guard required to compile upstream internals (GP_LOG_E etc.)
     _GPHOTO2_INTERNAL_CODE
-    # ---- USB / Android fd workaround ------------------------------------------
-    # HAVE_LIBUSB_WRAP_SYS_DEVICE, HAVE_LIBUSB_OPTION_NO_DEVICE_DISCOVERY and
-    # HAVE_LIBUSB1 are defined in cpp/config/config.h together with the
-    # comments explaining the fd flow. Do not re-define them here.
     # ---- The things we deliberately DISABLE on Android ------------------------
     # no gettext, no iconv, no libxml2, no libjpeg, no libexif, no old libusb-0.1
     # serial port, disk port, usbscsi, usbdiskdirect, vusb are not compiled.
@@ -153,7 +138,6 @@ set(PORT_CORE
 
 add_library(gphoto2_port SHARED ${PORT_CORE})
 target_compile_definitions(gphoto2_port PRIVATE
-    _GNU_SOURCE
     AM_H=1
     URL_USB_MASSSTORAGE="http://www.linux-usb.org/USB-guide/x498.html"
 )
@@ -195,7 +179,6 @@ set(GP_CORE
 )
 
 add_library(gphoto2 SHARED ${GP_CORE})
-target_compile_definitions(gphoto2 PRIVATE _GNU_SOURCE)
 target_link_libraries(gphoto2 PUBLIC gphoto2_port)
 target_link_libraries(gphoto2 PUBLIC gp_compile_defs)
 
@@ -212,7 +195,6 @@ set(PTP2_SRC
 )
 
 add_library(ptp2 SHARED ${PTP2_SRC})
-target_compile_definitions(ptp2 PRIVATE _GNU_SOURCE)
 target_link_libraries(ptp2 PUBLIC gphoto2 gphoto2_port)
 target_link_libraries(ptp2 PUBLIC gp_compile_defs)
 
