@@ -209,7 +209,6 @@ set(PTP2_SRC
     ${PTP2_DIR}/olympus-wrap.c
     ${PTP2_DIR}/chdk.c
     ${PTP2_DIR}/fujiptpip.c
-    ${PTP2_DIR}/eos-lv-histogram.c
 )
 
 add_library(ptp2 SHARED ${PTP2_SRC})
