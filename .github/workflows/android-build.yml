@@ -38,17 +38,24 @@ jobs:
       - name: Verify produced shared libraries
         run: |
           set -euo pipefail
-          base=camerabridge/build/intermediates
-          found=$(find $base -name "libcamera_bridge.so" | head -1)
-          if [ ! -f "$found" ]; then
-            echo "libcamera_bridge.so missing — ABIs did not build" && exit 1
+          found="$(find camerabridge/build/intermediates -name 'libcamera_bridge.so' | sort | head -n 1 || true)"
+          if [ -z "${found:-}" ]; then
+            echo "libcamera_bridge.so missing — ABI(s) did not build"
+            find camerabridge/build -name "*.so" | head -50
+            exit 1
           fi
-          dir=$(dirname "$found")
-          ls "$dir"
+          dir="$(dirname "$found")"
+          echo "built: $dir"
+          ls -lh "$dir"
           for lib in libgphoto2.so libgphoto2_port.so libptp2.so liblibusb1.so; do
             test -f "$dir/$lib" || { echo "missing $lib"; exit 1; }
           done
-          echo "all native libraries built"
+          # confirm second ABI too (arm64-v8a + armeabi-v7a required)
+          if ! find camerabridge/build/intermediates -name 'libcamera_bridge.so' | grep -q armeabi-v7a; then
+            echo "armeabi-v7a build missing"
+            exit 1
+          fi
+          echo "all native libraries built (both ABIs)"
 
       - name: Upload AAR artifact
         uses: actions/upload-artifact@v4
