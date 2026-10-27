@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- USB host feature: the app using this library declares android:USB -->
+    <uses-feature android:name="android.hardware.usb.host" />
+
+</manifest>

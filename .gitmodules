@@ -1,0 +1,6 @@
+[submodule "camerabridge/src/main/cpp/vendor/libusb"]
+	path = camerabridge/src/main/cpp/vendor/libusb
+	url = https://github.com/libusb/libusb
+[submodule "camerabridge/src/main/cpp/vendor/libgphoto2"]
+	path = camerabridge/src/main/cpp/vendor/libgphoto2
+	url = https://github.com/gphoto/libgphoto2
