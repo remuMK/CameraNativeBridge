@@ -47,7 +47,7 @@ jobs:
           dir="$(dirname "$found")"
           echo "built: $dir"
           ls -lh "$dir"
-          for lib in libgphoto2.so libgphoto2_port.so libptp2.so liblibusb1.so; do
+          for lib in libgphoto2.so libgphoto2_port.so libptp2.so libusb1.so; do
             test -f "$dir/$lib" || { echo "missing $lib"; exit 1; }
           done
           # confirm second ABI too (arm64-v8a + armeabi-v7a required)
