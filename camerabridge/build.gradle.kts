@@ -11,6 +11,9 @@ android {
         minSdk = 24          // camera_bridge + libgphoto2 need nothing newer
         consumerProguardFiles("consumer-rules.pro")
 
+        // AGP downloads this NDK on demand (licenses auto-accepted on CI).
+        ndkVersion = "27.0.12077973"
+
         ndk {
             abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
         }

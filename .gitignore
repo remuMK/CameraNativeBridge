@@ -1,0 +1,21 @@
+# Gradle
+.gradle/
+build/
+local.properties
+!gradle/wrapper/gradle-wrapper.jar
+
+# Android/NDK
+.cxx/
+captures/
+.ccache/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Kotlin/Java
+*.class
+
+# OS
+.DS_Store

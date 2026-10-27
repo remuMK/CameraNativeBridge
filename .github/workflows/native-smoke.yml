@@ -1,0 +1,47 @@
+name: Native smoke build (host toolchain)
+
+# Cheap drift-catcher: configures and compiles the five C targets with the
+# plain Linux gcc toolchain (no NDK needed). Runs quickly; catches upstream
+# source/config.h mismatches before the slow Android build.
+# This mirrors what CMakeLists.txt states in its header comment.
+
+on:
+  push:
+    paths:
+      - 'camerabridge/src/main/cpp/**'
+      - '.github/workflows/native-smoke.yml'
+  pull_request:
+    paths:
+      - 'camerabridge/src/main/cpp/**'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Install toolchain
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq cmake ninja-build gcc g++ ccache
+
+      - name: Configure (host, C only)
+        run: |
+          cmake -S camerabridge/src/main/cpp -B build/host \
+                -DCMAKE_BUILD_TYPE=Release -G Ninja
+
+      - name: Build C targets
+        run: |
+          ninja -C build/host ltdl usb1_static gphoto2_port usb1 gphoto2 ptp2
+
+      - name: Inspect artifacts
+        run: |
+          set -euo pipefail
+          ls -lh build/host/*.so
+          # camlib entry points that libgphoto2 dlsym()s at runtime
+          nm -D build/host/libptp2.so | grep -E " T camera_(id|abilities|init)"
+          # iolib entry points
+          nm -D build/host/libusb1.so | grep -E " T gp_port_library_(type|list|operations)"
+          echo "smoke build OK"
